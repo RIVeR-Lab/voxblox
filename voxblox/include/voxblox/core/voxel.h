@@ -46,6 +46,19 @@ struct IntensityVoxel {
   float weight = 0.0f;
 };
 
+struct EsdfCachingVoxel : EsdfVoxel {
+
+  EsdfCachingVoxel() = default;
+
+  EsdfCachingVoxel(const EsdfVoxel & other) : EsdfVoxel(other){
+  }
+
+  Eigen::Vector3f gradient = Eigen::Vector3f::Zero();
+  Eigen::Matrix3f hessian = Eigen::Matrix3f::Zero();
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 /// Used for serialization only.
 namespace voxel_types {
 const std::string kNotSerializable = "not_serializable";
