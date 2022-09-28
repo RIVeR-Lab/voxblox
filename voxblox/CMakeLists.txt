@@ -28,11 +28,13 @@ set("${PROJECT_NAME}_SRCS"
   src/core/block.cc
   src/core/esdf_map.cc
   src/core/tsdf_map.cc
+  src/core/layer.cc
   src/integrator/esdf_integrator.cc
   src/integrator/esdf_occ_integrator.cc
   src/integrator/integrator_utils.cc
   src/integrator/intensity_integrator.cc
   src/integrator/tsdf_integrator.cc
+  src/interpolator/interpolator.cc
   src/io/mesh_ply.cc
   src/io/sdf_ply.cc
   src/mesh/marching_cubes.cc

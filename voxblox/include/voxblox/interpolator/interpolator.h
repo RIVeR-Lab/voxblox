@@ -24,8 +24,18 @@ class Interpolator {
   bool getGradient(const Point& pos, Point* grad,
                    const bool interpolate = false) const;
 
+  bool getHessian(const Point& pos, Eigen::Matrix<FloatingPoint, 3, 3>* hess,
+                  const bool interpolate = false) const;
+
   bool getDistance(const Point& pos, FloatingPoint* distance,
                    bool interpolate = false) const;
+
+  bool getInterpolatedDistance(const Point& pos, FloatingPoint* distance) const;
+  bool getInterpolatedGradient(const Point& pos, Point* grad) const;
+  bool getInterpolatedDistanceGradient(
+      const Point& pos, FloatingPoint* distance, Point* gradient) const;
+  bool getInterpolatedDistanceGradientFromHessian(
+      const Point& pos, FloatingPoint* distance, Point* gradient) const;
 
   bool getWeight(const Point& pos, FloatingPoint* weight,
                  bool interpolate = false) const;

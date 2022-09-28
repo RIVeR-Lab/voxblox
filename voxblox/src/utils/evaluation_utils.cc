@@ -67,11 +67,6 @@ VoxelEvaluationResult computeVoxelError(
   return VoxelEvaluationResult::kEvaluated;
 }
 
-template <typename VoxelType>
-bool isObservedVoxel(const VoxelType& /*voxel*/) {
-  return false;
-}
-
 template <>
 bool isObservedVoxel(const TsdfVoxel& voxel) {
   return voxel.weight > 1e-6;
