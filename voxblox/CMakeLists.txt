@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(voxblox)
 
-find_package(catkin_simple REQUIRED )
-catkin_simple(ALL_DEPS_REQUIRED)
+find_package(catkin_simple REQUIRED)
+catkin_simple()
 
 set(CMAKE_MACOSX_RPATH 0)
 add_definitions(-std=c++11 -Wall -Wextra)
@@ -28,6 +28,7 @@ set("${PROJECT_NAME}_SRCS"
   src/core/block.cc
   src/core/esdf_map.cc
   src/core/tsdf_map.cc
+  src/core/layer.cc
   src/integrator/esdf_integrator.cc
   src/integrator/esdf_occ_integrator.cc
   src/integrator/integrator_utils.cc

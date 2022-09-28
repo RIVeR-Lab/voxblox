@@ -22,6 +22,22 @@ bool Interpolator<VoxelType>::getDistance(const Point& pos,
   }
 }
 
+template <>
+bool Interpolator<EsdfCachingVoxel>::getInterpolatedDistance(
+    const Point& pos, FloatingPoint* distance) const;
+
+template <>
+bool Interpolator<EsdfCachingVoxel>::getInterpolatedDistanceGradient(
+    const Point& pos, FloatingPoint* distance, Point* gradient) const;
+
+template <>
+bool Interpolator<EsdfCachingVoxel>::getInterpolatedDistanceGradientFromHessian(
+    const Point& pos, FloatingPoint* distance, Point* gradient) const;
+
+template <>
+bool Interpolator<EsdfCachingVoxel>::getInterpolatedGradient(const Point& pos,
+                                                      Point* grad) const;
+
 template <typename VoxelType>
 bool Interpolator<VoxelType>::getWeight(const Point& pos, FloatingPoint* weight,
                                         bool interpolate) const {
@@ -71,6 +87,38 @@ bool Interpolator<VoxelType>::getGradient(const Point& pos, Point* grad,
   // Scale by correct size.
   // This is central difference, so it's 2x voxel size between measurements.
   *grad /= (2 * block_ptr->voxel_size());
+  return true;
+}
+
+template <typename VoxelType>
+bool Interpolator<VoxelType>::getHessian(
+    const Point& pos, Eigen::Matrix<FloatingPoint, 3, 3>* hess,
+    const bool interpolate) const {
+  CHECK_NOTNULL(hess);
+
+  typename Layer<VoxelType>::BlockType::ConstPtr block_ptr =
+      layer_->getBlockPtrByCoordinates(pos);
+  if (block_ptr == nullptr) {
+    return false;
+  }
+  // Now get the gradient.
+  *hess = Eigen::Matrix<FloatingPoint, 3, 3>::Zero();
+  // Iterate over all 3 D, and over negative and positive signs in central
+  // difference.
+  for (unsigned int i = 0u; i < 3u; ++i) {
+    for (int sign = -1; sign <= 1; sign += 2) {
+      Point offset = Point::Zero();
+      offset(i) = sign * block_ptr->voxel_size();
+      Point offset_gradient;
+      if (!getGradient(pos + offset, &offset_gradient, interpolate)) {
+        return false;
+      }
+      (*hess).col(i) += offset_gradient * static_cast<FloatingPoint>(sign);
+    }
+  }
+  // Scale by correct size.
+  // This is central difference, so it's 2x voxel size between measurements.
+  *hess /= (2 * block_ptr->voxel_size());
   return true;
 }
 
@@ -401,6 +449,11 @@ bool Interpolator<VoxelType>::getNearestDistanceAndWeight(
 
 template <>
 inline float Interpolator<TsdfVoxel>::getVoxelSdf(const TsdfVoxel& voxel) {
+  return voxel.distance;
+}
+
+template <typename VoxelType>
+inline float Interpolator<VoxelType>::getVoxelSdf(const VoxelType& voxel) {
   return voxel.distance;
 }
 

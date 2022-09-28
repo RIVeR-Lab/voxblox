@@ -36,6 +36,19 @@ struct EsdfVoxel {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+struct EsdfCachingVoxel : EsdfVoxel {
+
+  EsdfCachingVoxel() = default;
+
+  EsdfCachingVoxel(const EsdfVoxel & other) : EsdfVoxel(other){
+  }
+
+  Eigen::Vector3f gradient = Eigen::Vector3f::Zero();
+  Eigen::Matrix3f hessian = Eigen::Matrix3f::Zero();
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 struct OccupancyVoxel {
   float probability_log = 0.0f;
   bool observed = false;

@@ -46,8 +46,10 @@ class Layer {
   /// Create the layer from protobuf layer header.
   explicit Layer(const LayerProto& proto);
 
+  template<typename> friend class Layer;
   /// Deep copy constructor.
-  explicit Layer(const Layer& other);
+  template <typename OtherVoxelType>
+  explicit Layer(const Layer<OtherVoxelType> & other);
 
   virtual ~Layer() {}
 
@@ -279,6 +281,9 @@ class Layer {
                          BlockMergingStrategy strategy);
 
   size_t getMemorySize() const;
+
+  void cacheGradients();
+  void cacheHessians();
 
  protected:
   FloatingPoint voxel_size_;
