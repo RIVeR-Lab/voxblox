@@ -37,45 +37,45 @@ EsdfServer::EsdfServer(const ros::NodeHandle& nh,
   setupRos();
 }
 
-void EsdfServer::setupRos() {
-  // Set up publisher.
-  esdf_pointcloud_pub_ =
-      nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("esdf_pointcloud",
-                                                              1, true);
-  esdf_slice_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >(
-      "esdf_slice", 1, true);
-  traversable_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >(
-      "traversable", 1, true);
+void EsdfServer::setupRos() 
+{
+  std::string topic_prefix = "/voxblox_node/";
 
-  esdf_map_pub_ =
-      nh_private_.advertise<voxblox_msgs::Layer>("esdf_map_out", 1, false);
+  // Set up publisher
+  esdf_pointcloud_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("esdf_pointcloud", 1, true);
+  esdf_slice_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("esdf_slice", 1, true);
+  traversable_pub_ = nh_private_.advertise<pcl::PointCloud<pcl::PointXYZI> >("traversable", 1, true);
+  esdf_map_pub_ = nh_private_.advertise<voxblox_msgs::Layer>("esdf_map_out", 1, false);
 
-  // Set up subscriber.
-  esdf_map_sub_ = nh_private_.subscribe("esdf_map_in", 1,
-                                        &EsdfServer::esdfMapCallback, this);
+  // Set up subscriber
+  esdf_map_sub_ = nh_private_.subscribe("/esdf_map", 1, &EsdfServer::esdfMapCallback, this);
 
   // Whether to clear each new pose as it comes in, and then set a sphere
   // around it to occupied.
-  nh_private_.param("clear_sphere_for_planning", clear_sphere_for_planning_,
-                    clear_sphere_for_planning_);
-  nh_private_.param("publish_esdf_map", publish_esdf_map_, publish_esdf_map_);
+  nh_private_.param(topic_prefix + "clear_sphere_for_planning", clear_sphere_for_planning_, clear_sphere_for_planning_);
+  nh_private_.param(topic_prefix + "publish_esdf_map", publish_esdf_map_, publish_esdf_map_);
 
   // Special output for traversable voxels. Publishes all voxels with distance
   // at least traversibility radius.
-  nh_private_.param("publish_traversable", publish_traversable_,
-                    publish_traversable_);
-  nh_private_.param("traversability_radius", traversability_radius_,
-                    traversability_radius_);
+  nh_private_.param(topic_prefix + "publish_traversable", publish_traversable_, publish_traversable_);
+  nh_private_.param(topic_prefix + "traversability_radius", traversability_radius_, traversability_radius_);
 
   double update_esdf_every_n_sec = 1.0;
-  nh_private_.param("update_esdf_every_n_sec", update_esdf_every_n_sec,
-                    update_esdf_every_n_sec);
+  nh_private_.param(topic_prefix + "update_esdf_every_n_sec", update_esdf_every_n_sec, update_esdf_every_n_sec);
 
-  if (update_esdf_every_n_sec > 0.0) {
-    update_esdf_timer_ =
-        nh_private_.createTimer(ros::Duration(update_esdf_every_n_sec),
-                                &EsdfServer::updateEsdfEvent, this);
+  if (update_esdf_every_n_sec > 0.0) 
+  {
+    update_esdf_timer_ = nh_private_.createTimer(ros::Duration(update_esdf_every_n_sec), &EsdfServer::updateEsdfEvent, this);
   }
+
+  std::cout << "[EsdfServer::setupRos] clear_sphere_for_planning: " << clear_sphere_for_planning_ << std::endl;
+  std::cout << "[EsdfServer::setupRos] publish_esdf_map: " << publish_esdf_map_ << std::endl;
+  std::cout << "[EsdfServer::setupRos] publish_traversable: " << publish_traversable_ << std::endl;
+  std::cout << "[EsdfServer::setupRos] traversability_radius: " << traversability_radius_ << std::endl;
+  std::cout << "[EsdfServer::setupRos] update_esdf_every_n_sec: " << update_esdf_every_n_sec << std::endl;
+
+  //std::cout << "[EsdfServer::setupRos] BEFORE INF LOOP" << std::endl;
+  //while(1){;}
 }
 
 void EsdfServer::publishAllUpdatedEsdfVoxels() {
@@ -116,7 +116,8 @@ bool EsdfServer::generateEsdfCallback(
   return true;
 }
 
-void EsdfServer::updateEsdfEvent(const ros::TimerEvent& /*event*/) {
+void EsdfServer::updateEsdfEvent(const ros::TimerEvent& /*event*/) 
+{
   updateEsdf();
 }
 
@@ -141,14 +142,18 @@ void EsdfServer::publishTraversable() {
   traversable_pub_.publish(pointcloud);
 }
 
-void EsdfServer::publishMap(bool reset_remote_map) {
-  if (!publish_esdf_map_) {
+void EsdfServer::publishMap(bool reset_remote_map) 
+{
+  if (!publish_esdf_map_) 
+  {
     return;
   }
 
   int subscribers = this->esdf_map_pub_.getNumSubscribers();
-  if (subscribers > 0) {
-    if (num_subscribers_esdf_map_ < subscribers) {
+  if (subscribers > 0) 
+  {
+    if (num_subscribers_esdf_map_ < subscribers) 
+    {
       // Always reset the remote map and send all when a new subscriber
       // subscribes. A bit of overhead for other subscribers, but better than
       // inconsistent map states.
@@ -159,7 +164,8 @@ void EsdfServer::publishMap(bool reset_remote_map) {
     voxblox_msgs::Layer layer_msg;
     serializeLayerAsMsg<EsdfVoxel>(this->esdf_map_->getEsdfLayer(),
                                    only_updated, &layer_msg);
-    if (reset_remote_map) {
+    if (reset_remote_map) 
+    {
       layer_msg.action = static_cast<uint8_t>(MapDerializationAction::kReset);
     }
     this->esdf_map_pub_.publish(layer_msg);
@@ -169,7 +175,8 @@ void EsdfServer::publishMap(bool reset_remote_map) {
   TsdfServer::publishMap();
 }
 
-bool EsdfServer::saveMap(const std::string& file_path) {
+bool EsdfServer::saveMap(const std::string& file_path) 
+{
   // Output TSDF map first, then ESDF.
   const bool success = TsdfServer::saveMap(file_path);
 
@@ -178,7 +185,8 @@ bool EsdfServer::saveMap(const std::string& file_path) {
          io::SaveLayer(esdf_map_->getEsdfLayer(), file_path, kClearFile);
 }
 
-bool EsdfServer::loadMap(const std::string& file_path) {
+bool EsdfServer::loadMap(const std::string& file_path) 
+{
   // Load in the same order: TSDF first, then ESDF.
   bool success = TsdfServer::loadMap(file_path);
 
@@ -189,8 +197,10 @@ bool EsdfServer::loadMap(const std::string& file_path) {
              kMultipleLayerSupport, esdf_map_->getEsdfLayerPtr());
 }
 
-void EsdfServer::updateEsdf() {
-  if (tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) {
+void EsdfServer::updateEsdf() 
+{
+  if (tsdf_map_->getTsdfLayer().getNumberOfAllocatedBlocks() > 0) 
+  {
     const bool clear_updated_flag_esdf = true;
     esdf_integrator_->updateFromTsdfLayer(clear_updated_flag_esdf);
   }
@@ -230,17 +240,26 @@ void EsdfServer::newPoseCallback(const Transformation& T_G_C) {
   block_remove_timer.Stop();
 }
 
-void EsdfServer::esdfMapCallback(const voxblox_msgs::Layer& layer_msg) {
+void EsdfServer::esdfMapCallback(const voxblox_msgs::Layer& layer_msg) 
+{
+  std::cout << "[EsdfServer::esdfMapCallback] START " << std::endl;
+
   timing::Timer receive_map_timer("map/receive_esdf");
 
   bool success =
       deserializeMsgToLayer<EsdfVoxel>(layer_msg, esdf_map_->getEsdfLayerPtr());
 
-  if (!success) {
+  if (!success) 
+  {
     ROS_ERROR_THROTTLE(10, "Got an invalid ESDF map message!");
-  } else {
+    std::cout << "[EsdfServer::esdfMapCallback] END " << std::endl;
+  } 
+  else 
+  {
     ROS_INFO_ONCE("Got an ESDF map from ROS topic!");
-    if (publish_pointclouds_) {
+    std::cout << "[EsdfServer::esdfMapCallback] END " << std::endl;
+    if (publish_pointclouds_) 
+    {
       publishPointclouds();
     }
   }

@@ -1,6 +1,7 @@
 #ifndef VOXBLOX_CORE_COMMON_H_
 #define VOXBLOX_CORE_COMMON_H_
 
+#include <iostream>
 #include <deque>
 #include <list>
 #include <memory>
@@ -152,10 +153,25 @@ constexpr float kFloatEpsilon = 1e-6;    /**< Used for weights. */
  */
 template <typename IndexType>
 inline IndexType getGridIndexFromPoint(const Point& point,
-                                       const FloatingPoint grid_size_inv) {
-  return IndexType(std::floor(point.x() * grid_size_inv + kEpsilon),
-                   std::floor(point.y() * grid_size_inv + kEpsilon),
-                   std::floor(point.z() * grid_size_inv + kEpsilon));
+                                       const FloatingPoint grid_size_inv) 
+{
+  std::cout << "[common::getGridIndexFromPoint] START" << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] x: " << point.x() << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] x: " << point.y() << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] x: " << point.z() << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] grid_size_inv: " << grid_size_inv << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] x * grid_size_inv + kEpsilon: " << point.x() * grid_size_inv + kEpsilon << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] y * grid_size_inv + kEpsilon: " << point.y() * grid_size_inv + kEpsilon << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] z * grid_size_inv + kEpsilon: " << point.z() * grid_size_inv + kEpsilon << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] grid_size_inv: " << grid_size_inv << std::endl;
+
+  auto ayi = IndexType(std::floor(point.x() * grid_size_inv + kEpsilon),
+                       std::floor(point.y() * grid_size_inv + kEpsilon),
+                       std::floor(point.z() * grid_size_inv + kEpsilon));
+
+  std::cout << "[common::getGridIndexFromPoint] ayi: " << std::endl << ayi << std::endl;
+  std::cout << "[common::getGridIndexFromPoint] END" << std::endl;
+  return ayi;
 }
 
 /**

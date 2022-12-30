@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "voxblox/Block.pb.h"
+#include "./Block.pb.h"
 #include "voxblox/core/common.h"
 
 namespace voxblox {
@@ -15,7 +15,7 @@ namespace voxblox {
 namespace Update {
 /// Status of which derived things still need to be updated.
 enum Status { kMap, kMesh, kEsdf, kCount };
-}  // namespace Update
+}
 
 /** An n x n x n container holding VoxelType. It is aware of its 3D position and
  * contains functions for accessing voxels by position and index */
@@ -32,7 +32,7 @@ class Block {
         voxels_per_side_(voxels_per_side),
         voxel_size_(voxel_size),
         origin_(origin),
-        updated_(false) {
+        updated_(false){
     num_voxels_ = voxels_per_side_ * voxels_per_side_ * voxels_per_side_;
     voxel_size_inv_ = 1.0 / voxel_size_;
     block_size_ = voxels_per_side_ * voxel_size_;

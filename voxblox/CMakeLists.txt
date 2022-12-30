@@ -14,10 +14,18 @@ add_definitions(-std=c++11 -Wall -Wextra)
 # Otherwise use system protobuf.
 set(PROTO_DEFNS proto/voxblox/Block.proto
                 proto/voxblox/Layer.proto)
-set(BASE_PATH "proto")
-set(PROTOBUF_COMPILE_PYTHON true)
-
-PROTOBUF_CATKIN_GENERATE_CPP2(${BASE_PATH} PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
+set(PROTO_LIBRARIES "")
+find_package(protobuf_catkin QUIET)
+if (protobuf_catkin_FOUND)
+  message(STATUS "Using protobuf_catkin")
+  PROTOBUF_CATKIN_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
+  set(PROTO_LIBRARIES ${protobuf_catkin_LIBRARIES})
+else()
+  message(STATUS "Using system protobuf")
+  find_package(Protobuf REQUIRED)
+  PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_DEFNS})
+  set(PROTO_LIBRARIES ${PROTOBUF_LIBRARIES})
+endif()
 
 ####################
 # SET SOURCE FILES #
@@ -34,6 +42,7 @@ set("${PROJECT_NAME}_SRCS"
   src/integrator/integrator_utils.cc
   src/integrator/intensity_integrator.cc
   src/integrator/tsdf_integrator.cc
+  src/interpolator/interpolator.cc
   src/io/mesh_ply.cc
   src/io/sdf_ply.cc
   src/mesh/marching_cubes.cc
@@ -51,9 +60,25 @@ set("${PROJECT_NAME}_SRCS"
 #############
 # LIBRARIES #
 #############
+# NOTE(mereweth@jpl.nasa.gov) - Be careful when compiling Proto cc files. It is
+# best to do so only once (make a shared library for each set of Proto files).
+# Otherwise, at some point, you will get errors from double-adding protobuf
+# formats, of the following form:
+# [libprotobuf ERROR google/protobuf/descriptor_database.cc:57]
+# File already exists in database: Block.proto
+
+# Avoid having multiple compiled copies of the same .pb.cc
+# file sharing a single copy of libprotobuf.so
 cs_add_library(${PROJECT_NAME}_proto
   ${PROTO_SRCS}
 )
+# Specify proto headers as public headers so we can install them later.
+set_target_properties(${PROJECT_NAME}_proto PROPERTIES PUBLIC_HEADER "${PROTO_HDRS}")
+# We need the binary folder in the include directories so we can find the proto
+# headers within this library and all dependent packages.
+target_include_directories(${PROJECT_NAME}_proto
+                           PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(${PROJECT_NAME}_proto ${PROTO_LIBRARIES})
 
 cs_add_library(${PROJECT_NAME}
   ${${PROJECT_NAME}_SRCS}
@@ -139,5 +164,13 @@ target_link_libraries(test_clear_spheres ${PROJECT_NAME})
 ##########
 # EXPORT #
 ##########
+
+# The proto headers are not installed automatically with cs_install,
+# we need to specify this here.
+install(TARGETS ${PROJECT_NAME}_proto
+        LIBRARY DESTINATION "lib"
+        PUBLIC_HEADER DESTINATION "include"
+)
 cs_install()
-cs_export(INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include)
+cs_export(INCLUDE_DIRS include ${CMAKE_CURRENT_BINARY_DIR}
+          CFG_EXTRAS voxblox-extras.cmake)

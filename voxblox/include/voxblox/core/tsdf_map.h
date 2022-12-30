@@ -34,8 +34,7 @@ class TsdfMap {
 
   explicit TsdfMap(const Config& config)
       : tsdf_layer_(new Layer<TsdfVoxel>(config.tsdf_voxel_size,
-                                         config.tsdf_voxels_per_side)),
-        interpolator_(tsdf_layer_.get()) {
+                                         config.tsdf_voxels_per_side)) {
     block_size_ = config.tsdf_voxel_size * config.tsdf_voxels_per_side;
   }
 
@@ -44,8 +43,7 @@ class TsdfMap {
       : TsdfMap(aligned_shared<Layer<TsdfVoxel>>(layer)) {}
 
   /// Creates a new TsdfMap that contains this layer.
-  explicit TsdfMap(Layer<TsdfVoxel>::Ptr layer)
-      : tsdf_layer_(layer), interpolator_(tsdf_layer_.get()) {
+  explicit TsdfMap(Layer<TsdfVoxel>::Ptr layer) : tsdf_layer_(layer) {
     if (!layer) {
       /* NOTE(mereweth@jpl.nasa.gov) - throw std exception for Python to catch
        * This is idiomatic when wrapping C++ code for Python, especially with

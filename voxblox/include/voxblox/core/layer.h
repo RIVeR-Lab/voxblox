@@ -1,14 +1,13 @@
 #ifndef VOXBLOX_CORE_LAYER_H_
 #define VOXBLOX_CORE_LAYER_H_
 
+#include <glog/logging.h>
 #include <memory>
 #include <string>
 #include <utility>
 
-#include <glog/logging.h>
-
-#include "voxblox/Block.pb.h"
-#include "voxblox/Layer.pb.h"
+#include "./Block.pb.h"
+#include "./Layer.pb.h"
 #include "voxblox/core/block.h"
 #include "voxblox/core/block_hash.h"
 #include "voxblox/core/common.h"
@@ -71,21 +70,30 @@ class Layer {
     return *(it->second);
   }
 
-  inline typename BlockType::ConstPtr getBlockPtrByIndex(
-      const BlockIndex& index) const {
+  inline typename BlockType::ConstPtr getBlockPtrByIndex(const BlockIndex& index) const 
+  {
+    std::cout << "[layer::getBlockPtrByIndex] START" << std::endl;
+    std::cout << "[layer::getBlockPtrByIndex] block_map_ size: " << block_map_.size() << std::endl;
     typename BlockHashMap::const_iterator it = block_map_.find(index);
-    if (it != block_map_.end()) {
+    if (it != block_map_.end()) 
+    {
       return it->second;
-    } else {
+    }
+    else 
+    {
       return typename BlockType::ConstPtr();
     }
   }
 
-  inline typename BlockType::Ptr getBlockPtrByIndex(const BlockIndex& index) {
+  inline typename BlockType::Ptr getBlockPtrByIndex(const BlockIndex& index) 
+  {
     typename BlockHashMap::iterator it = block_map_.find(index);
-    if (it != block_map_.end()) {
+    if (it != block_map_.end()) 
+    {
       return it->second;
-    } else {
+    } 
+    else 
+    {
       return typename BlockType::Ptr();
     }
   }
@@ -104,8 +112,12 @@ class Layer {
     }
   }
 
-  inline typename BlockType::ConstPtr getBlockPtrByCoordinates(
-      const Point& coords) const {
+  inline typename BlockType::ConstPtr getBlockPtrByCoordinates(const Point& coords) const 
+  {
+    std::cout << "[layer::getBlockPtrByCoordinates] START" << std::endl;
+    std::cout << "[layer::getBlockPtrByCoordinates] coords: " << std::endl << coords << std::endl;
+
+    std::cout << "[layer::getBlockPtrByCoordinates] END" << std::endl;
     return getBlockPtrByIndex(computeBlockIndexFromCoordinates(coords));
   }
 
@@ -127,8 +139,12 @@ class Layer {
    * function doesn't always compute the correct block index for coordinates
    * near the block boundaries.
    */
-  inline BlockIndex computeBlockIndexFromCoordinates(
-      const Point& coords) const {
+  inline BlockIndex computeBlockIndexFromCoordinates(const Point& coords) const 
+  {
+    std::cout << "[layer::computeBlockIndexFromCoordinates] START" << std::endl;
+    std::cout << "[layer::computeBlockIndexFromCoordinates] coords: " << std::endl << coords << std::endl;
+    std::cout << "[layer::computeBlockIndexFromCoordinates] END" << std::endl;
+
     return getGridIndexFromPoint<BlockIndex>(coords, block_size_inv_);
   }
 

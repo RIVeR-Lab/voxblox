@@ -13,6 +13,7 @@ bool readProtoMsgCountFromStream(std::istream* stream_in,
   CHECK_NOTNULL(stream_in);
   CHECK_NOTNULL(message_count);
   CHECK_NOTNULL(byte_offset);
+  CHECK(stream_in->is_open());
   stream_in->clear();
   stream_in->seekg(*byte_offset, std::ios::beg);
   google::protobuf::io::IstreamInputStream raw_in(stream_in);
@@ -43,6 +44,7 @@ bool readProtoMsgFromStream(std::istream* stream_in,
   CHECK_NOTNULL(stream_in);
   CHECK_NOTNULL(message);
   CHECK_NOTNULL(byte_offset);
+  CHECK(stream_in->is_open());
 
   stream_in->clear();
   stream_in->seekg(*byte_offset, std::ios::beg);
