@@ -38,7 +38,8 @@ TsdfServer::TsdfServer(const ros::NodeHandle& nh,
       accumulate_icp_corrections_(true),
       pointcloud_queue_size_(1),
       num_subscribers_tsdf_map_(0),
-      transformer_(nh, nh_private) {
+      transformer_(nh, nh_private),
+      clearFlag_(false) {
   getServerConfigFromRosParam(nh_private);
 
   // Advertise topics.
@@ -352,8 +353,11 @@ bool TsdfServer::getNextPointcloudFromQueue(
 
 void TsdfServer::insertPointcloud(
     const sensor_msgs::PointCloud2::Ptr& pointcloud_msg_in) {
-    
-  this ->clear();
+
+  if (clearFlag_)
+  {
+    this ->clear();
+  } 
 
   if (pointcloud_msg_in->header.stamp - last_msg_time_ptcloud_ >
       min_time_between_msgs_) {
@@ -634,7 +638,7 @@ void TsdfServer::clear() {
 
   // Publish a message to reset the map to all subscribers.
   if (publish_tsdf_map_) {
-    constexpr bool kResetRemoteMap = true;
+    constexpr bool kResetRemoteMap = false;
     publishMap(kResetRemoteMap);
   }
 }

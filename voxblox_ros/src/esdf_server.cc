@@ -254,7 +254,7 @@ void EsdfServer::clear() {
   TsdfServer::clear();
 
   // Publish a message to reset the map to all subscribers.
-  constexpr bool kResetRemoteMap = true;
+  constexpr bool kResetRemoteMap = false;
   publishMap(kResetRemoteMap);
 }
 

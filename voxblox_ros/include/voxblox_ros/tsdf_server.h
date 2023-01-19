@@ -113,6 +113,8 @@ class TsdfServer {
   }
   std::string getWorldFrame() const { return world_frame_; }
 
+  void setClearFlag(bool clearFlag) { clearFlag_ = clearFlag; }
+
   /// CLEARS THE ENTIRE MAP!
   virtual void clear();
 
@@ -223,6 +225,8 @@ class TsdfServer {
    * iteration.
    */
   bool accumulate_icp_corrections_;
+
+  bool clearFlag_;
 
   /// Subscriber settings.
   int pointcloud_queue_size_;
